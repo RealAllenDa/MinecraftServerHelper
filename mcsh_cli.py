@@ -4,11 +4,9 @@
  Coded by AllenDa 2020.
  Licensed under MIT.
  ***************************************
- Module name: MCSH.init
  Module Description:
-    Handles all initializing things.
+    The entrance for the CLI interface.
 """
-from MCSH.shared import *
-def init():
-    config_instance.parser_init()
-    config_instance.parser_parse()
+import MCSH.init
+if __name__ == "__main__":
+    MCSH.init.init()

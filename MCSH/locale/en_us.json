@@ -1,0 +1,19 @@
+{
+  "version": "MCSH v0.0.1-InEDev",
+  "parser": {
+    "description": "A Minecraft Server Helper.",
+    "epilog": "For more detailed help, see USAGE.md in the root folder.",
+    "helps": {
+      "install": "Install a server.",
+      "remove": "Remove server(s).",
+      "reinstall": "Reinstall a server.",
+      "autoupdate": "Update all server(s) in the list.",
+      "upgrade": "Upgrade all server(s) to current version, including MCSH. WARNING: Under very early development, strongly unrecommended.",
+      "download": "Download a specified server program.",
+      "list": "List all installed server(s).",
+      "repolist": "List all server(s) in the repository.",
+      "reposearch": "Search for server(s) in the repository.",
+      "reposhow": "Show the specific package detail in the repository."
+    }
+  }
+}

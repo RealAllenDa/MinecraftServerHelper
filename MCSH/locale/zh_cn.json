@@ -1,0 +1,19 @@
+{
+  "version": "MCSH v0.0.1-InEDev",
+  "parser": {
+    "description": "一个Minecraft服务器助手。",
+    "epilog": "想要更加详细的帮助，请参照在根目录的USAGE.md。",
+    "helps": {
+      "install": "安装一个服务器。",
+      "remove": "移除几（一）个服务器。",
+      "reinstall": "重新安装一个服务器。",
+      "autoupdate": "更新在列表中所有的服务器。",
+      "upgrade": "更新所有的服务器到现在的版本，包括MCSH。注意：在早期开发阶段，非常不建议使用。",
+      "download": "下载一个指定的服务器程序。",
+      "list": "列出所有安装了的服务器。",
+      "repolist": "列出所有在仓库中的服务器。",
+      "reposearch": "在仓库中查找一个特定的服务器。",
+      "reposhow": "显示一个在仓库中的指定服务器的详细信息。"
+    }
+  }
+}
