@@ -7,6 +7,7 @@
  Module Name: MCSH.config
  Module Description:
     A module that stores all the configuration needed for MCSH.
+    Main argparse module for MCSH.
 """
 import argparse, json
 
