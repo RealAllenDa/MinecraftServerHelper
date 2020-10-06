@@ -5,7 +5,7 @@
     "epilog": "想要更加详细的帮助，请参照在根目录的USAGE.md。",
     "helps": {
       "install": "安装一个服务器。",
-      "remove": "移除几（一）个服务器。",
+      "remove": "移除（几/一）个服务器。",
       "reinstall": "重新安装一个服务器。",
       "autoupdate": "更新在列表中所有的服务器。",
       "upgrade": "更新所有的服务器到现在的版本，包括MCSH。注意：在早期开发阶段，非常不建议使用。",
@@ -15,5 +15,10 @@
       "reposearch": "在仓库中查找一个特定的服务器。",
       "reposhow": "显示一个在仓库中的指定服务器的详细信息。"
     }
+  },
+  "exceptions": {
+    "fatal_lang_version_mismatch": "语言文件的版本与程序版本不匹配。\n程序版本是{program}，但语言文件的版本是{locale}。\n一次不正确的安装或者升级可能会触发这个错误。\n请重新安装MCSH。",
+    "error_file_corrupted_or_missing_download_avail": "文件 {file_name} ({file_path}) 已经损坏或者找不到。 正在尝试从仓库中重新获取一份...",
+    "error_file_corrupted_or_missing_download_unavail": "文件 {file_name} ({file_path}) 已经损坏或者找不到。 有些MCSH的功能可能被限制。"
   }
 }
