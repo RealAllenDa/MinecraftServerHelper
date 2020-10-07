@@ -1,0 +1,17 @@
+{
+  "minimum": {
+    "players": 10,
+    "CPUFreq": 2.5,
+    "RAM": 4
+  },
+  "recommended": {
+    "players": 50,
+    "CPUFreq": 3,
+    "RAM": 8
+  },
+  "optimal": {
+    "players": 100,
+    "CPUFreq": 3.5,
+    "RAM": 16
+  }
+}

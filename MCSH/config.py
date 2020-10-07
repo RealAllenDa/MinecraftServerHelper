@@ -9,37 +9,48 @@
     A module that stores all the configuration needed for MCSH.
     Main argparse module for MCSH.
 """
-import argparse, json
+import argparse
+import json
+import sys
+
+from MCSH.logging import log
+
+MCSH_version = "MCSH v0.0.1-InEDev"
 
 
 class Config:
     def __init__(self):
-        # TODO: raise Exception() -> Logging function
         """
         Initialize for the config.
         """
-        # Version of MCSH
-        self.version = "MCSH v0.0.1-InEDev"
         # Initialize config
         try:
             self.program_config_file = open("MCSH/config/MCSH.json")
             self.program_config = json.loads(self.program_config_file.read())
+            self.program_config_file.close()
         except:
-            print("The file {file_name} ({file_path}) is missing or corrupted. "
-                  "Trying to retrieve a new one from the repo...".format(
-                **{"file_name": "MCSH.json", "file_path": "MCSH/config/MCSH.json"})
-            )
+            log("initialize_config", "WARNING", "The file {file_name} ({file_path}) is missing or corrupted. "
+                                                "Trying to retrieve a new one from the repo...".format(
+                **{"file_name": "MCSH.json", "file_path": "MCSH/config/MCSH.json"}))
         # Initialize locales
-        self.locale = "zh_cn"
-        self.locale_file = open("MCSH/locale/{}.json".format(self.locale), encoding="utf-8")
-        self.locale_dict = json.loads(self.locale_file.read())
-        self.locale_file.close()
+        self.locale = self.program_config["locale"]
+        try:
+            self.locale_file = open("MCSH/locale/{}.json".format(self.locale), encoding="utf-8")
+            self.locale_dict = json.loads(self.locale_file.read())
+            self.locale_file.close()
+        except:
+            log("initialize_locale", "FATAL", "FATAL ERROR during pre-initialization:\n"
+                                              "Unable to load locale file.\n"
+                                              "This could be triggered by an improper installation and/or upgrade.\n"
+                                              "Please reinstall MCSH.")
+            sys.exit(2)
         # Detect the version of the locale file.
-        # If it's outdated, raise an exception.
-        if self.locale_dict["version"] != self.version:
-            raise Exception(self.locale_dict["exceptions"]["fatal_lang_version_mismatch"].format(
-                **{"program": self.version,
+        # If it's outdated, raise a fatal error.
+        if self.locale_dict["version"] != MCSH_version:
+            log("initialize_locale", "FATAL", self.locale_dict["exceptions"]["fatal_lang_version_mismatch"].format(
+                **{"program": MCSH_version,
                    "locale": self.locale_dict["version"]}))
+            sys.exit(2)
         # Initialize parsers
         self.parser = argparse.ArgumentParser(description=self.locale_dict["parser"]["description"],
                                               epilog=self.locale_dict["parser"]["epilog"])
@@ -53,9 +64,9 @@ class Config:
         self.parser.add_argument("-v", "--version", action="version", version=self.version)
         self.operations.add_argument("--install", action="store_true", default=False,
                                      help=self.locale_dict["parser"]["helps"]["install"])
-        self.operations.add_argument("--remove", nargs="+", metavar="servername",
+        self.operations.add_argument("--remove", nargs="+", metavar="ServerName",
                                      help=self.locale_dict["parser"]["helps"]["remove"])
-        self.operations.add_argument("--reinstall", nargs=1, metavar="servername",
+        self.operations.add_argument("--reinstall", nargs=1, metavar="ServerName",
                                      help=self.locale_dict["parser"]["helps"]["reinstall"])
         self.operations.add_argument("--autoupdate", action="store_true",
                                      help=self.locale_dict["parser"]["helps"]["autoupdate"])
@@ -66,9 +77,9 @@ class Config:
         self.operations.add_argument("--list", action="store_true", help=self.locale_dict["parser"]["helps"]["list"])
         self.operations.add_argument("--repolist", action="store_true",
                                      help=self.locale_dict["parser"]["helps"]["repolist"])
-        self.operations.add_argument("--reposearch", nargs=1, metavar="servername",
+        self.operations.add_argument("--reposearch", nargs=1, metavar="ServerName",
                                      help=self.locale_dict["parser"]["helps"]["reposearch"])
-        self.operations.add_argument("--reposhow", nargs=1, metavar="servername",
+        self.operations.add_argument("--reposhow", nargs=1, metavar="ServerName",
                                      help=self.locale_dict["parser"]["helps"]["reposhow"])
 
     def parser_parse(self):

@@ -8,7 +8,14 @@
  Module Description:
     Handles all initializing things.
 """
-from MCSH.shared import *
+from MCSH.config import Config
+from MCSH.get_computer_info import ComputerInfo
+from MCSH.logging import initialize_logger
+
+config_instance = None
+computer_info_instance = None
+
+
 def init():
     config_instance.parser_init()
     config_instance.parser_parse()
