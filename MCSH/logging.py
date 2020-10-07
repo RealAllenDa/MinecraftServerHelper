@@ -62,6 +62,9 @@ def initialize_logger():
     Default log threshold: 10 logs
     """
     path = "./MCSH/logs"
+    # First-time initialization
+    if not os.path.exists(path):
+        os.mkdir(path)
     # Auto-cleaning logs
     if len([lists for lists in os.listdir(path) if os.path.isfile(os.path.join(path, lists))]) >= 10:
         for lists in os.listdir(path):
