@@ -10,15 +10,15 @@
     Also, when MCSH crashed, can be used for 'System Information' section.
     Because Linux and Windows handles information in very different ways,
     I had to split the way of getting information for different platforms.
+    That means you can't run it on other platforms except for Windows and Linux.
  -------------------- MODULE CAUTION --------------------
  WARNING:   This module contains some registry operations in Windows.
             Any improper modifying, corrupting, changing a specific value in this module
-            may cause serious errors, probably fatal ones, and not allowing the system to boot.
+            may cause serious errors, even fatal ones, not allowing the system to boot.
             Please, don't change anything UNLESS you know what you're doing!
 
  WARNING:   This module, if not used properly, CAN cause damage to the computer.
 """
-# Imports & Pre-check
 import fileinput
 import hashlib
 import platform
