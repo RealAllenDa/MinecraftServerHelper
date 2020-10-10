@@ -2,15 +2,18 @@
   "version": "MCSH v0.0.1-InEDev",
   "parser": {
     "description": "A Minecraft Server Helper.",
-    "epilog": "For more detailed help, see USAGE.md in the root folder.",
+    "epilog": "NOTE: The MCSH will only execute command by the sequence mentioned above.\ne.g. mcsh-cli.py --remove --install, MCSH will only execute --install, not --remove.\nFor more detailed help, see README.md in the root folder.",
+    "operations_title": "All MCSH Commands",
     "helps": {
+      "version": "Display the version of MCSH.",
+      "help": "Show this help message.",
+      "list": "List all installed server(s).",
       "install": "Install a server.",
       "remove": "Remove server(s).",
       "reinstall": "Reinstall a server.",
       "autoupdate": "Update all server(s) in the list.",
-      "upgrade": "Upgrade all server(s) to current version, including MCSH. WARNING: Under very early development, strongly unrecommended.",
+      "upgrade": "Upgrade all server(s) to current version, including MCSH.\nWARNING: Under very early development, strongly unrecommended.",
       "download": "Download a specified server program.",
-      "list": "List all installed server(s).",
       "repolist": "List all server(s) in the repository.",
       "reposearch": "Search for server(s) in the repository.",
       "reposhow": "Show the specific package detail in the repository."

@@ -21,6 +21,20 @@ first_time_setup = False
 
 
 def init():
+    """
+    Initializes all modules.
+    """
+    global config_instance, computer_info_instance, first_time_setup
+    # If it's first time to run this program
+    if not os.path.exists("./MCSH/logs"):
+        first_time_setup = True
+    # Logger Module
+    initialize_logger()
+    # Computer Info Module
+    computer_info_instance = ComputerInfo()
+    computer_info_instance.get_computer_info()
+    # Config Module
+    config_instance = Config()
     config_instance.parser_init()
     config_instance.parser_parse()
     # Start first-time setup routine (If first_time_setup is True)

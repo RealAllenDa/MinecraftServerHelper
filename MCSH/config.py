@@ -19,6 +19,10 @@ MCSH_version = "MCSH v0.0.1-InEDev"
 
 
 class Config:
+    """
+    The main config class for MCSH.
+    """
+
     def __init__(self):
         """
         Initialize for the config.
@@ -52,16 +56,27 @@ class Config:
                    "locale": self.locale_dict["version"]}))
             sys.exit(2)
         # Initialize parsers
-        self.parser = argparse.ArgumentParser(description=self.locale_dict["parser"]["description"],
-                                              epilog=self.locale_dict["parser"]["epilog"])
+        # noinspection PyTypeChecker
+        self.parser = argparse.ArgumentParser(add_help=False,
+                                              description=self.locale_dict["parser"]["description"],
+                                              epilog=self.locale_dict["parser"]["epilog"],
+                                              formatter_class=argparse.RawTextHelpFormatter)
         self.parser_args = None
-        self.operations = self.parser.add_mutually_exclusive_group(required=True)
+        self.operations = self.parser.add_argument_group(title=self.locale_dict["parser"]["operations_title"])
+        self.parse_sequence = ["install", "remove", "reinstall", "autoupdate", "upgrade", "download",
+                               "repolist", "reposearch", "reposhow"]
+        self.execute_command = None
 
     def parser_init(self):
         """
         Set the commands for the parser.
         """
-        self.parser.add_argument("-v", "--version", action="version", version=self.version)
+        self.operations.add_argument("--version", action="version", version=MCSH_version,
+                                     help=self.locale_dict["parser"]["helps"]["version"])
+        self.operations.add_argument("--help", action="help",
+                                     help=self.locale_dict["parser"]["helps"]["help"])
+        self.operations.add_argument("--list", action="store_true",
+                                     help=self.locale_dict["parser"]["helps"]["list"])
         self.operations.add_argument("--install", action="store_true", default=False,
                                      help=self.locale_dict["parser"]["helps"]["install"])
         self.operations.add_argument("--remove", nargs="+", metavar="ServerName",
@@ -74,7 +89,6 @@ class Config:
                                      help=self.locale_dict["parser"]["helps"]["upgrade"])
         self.operations.add_argument("--download", action="store_true",
                                      help=self.locale_dict["parser"]["helps"]["download"])
-        self.operations.add_argument("--list", action="store_true", help=self.locale_dict["parser"]["helps"]["list"])
         self.operations.add_argument("--repolist", action="store_true",
                                      help=self.locale_dict["parser"]["helps"]["repolist"])
         self.operations.add_argument("--reposearch", nargs=1, metavar="ServerName",
@@ -87,4 +101,14 @@ class Config:
         Parse the args the user had entered.
         """
         self.parser_args = self.parser.parse_args()
-        print(self.parser_args)
+        for i in self.parse_sequence:
+            if eval("self.parser_args." + i) is True:
+                self.execute_command = i
+                break
+            elif eval("self.parser_args." + i) is not None and eval("self.parser_args." + i) is not False:
+                self.execute_command = i + "({})".format(eval("self.parser_args." + i))
+                break
+        if self.execute_command is None:
+            log("parse_command", "FATAL", "Error: no commands specified.")
+            self.parser.print_help()
+        print(self.execute_command)
