@@ -22,7 +22,7 @@ def log(log_module, log_severity, log_text):
     log_severity: FATAL, ERROR, WARNING, INFO, DEBUG
     """
     COLORS = {
-        "FATAL": "\033[1;30;41m",
+        "FATAL": "\033[1;37;41m",
         "ERROR": "\033[31m",
         "WARNING": "\033[33m",
         "INFO": "",
