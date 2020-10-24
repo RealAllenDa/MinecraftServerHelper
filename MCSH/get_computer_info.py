@@ -144,7 +144,7 @@ class ComputerInfo:
         try:
             if platform.system() in ["Linux"]:
                 for line in fileinput.input("/proc/cpuinfo"):
-                    if 'Mhz' in line:
+                    if 'MHz' in line:
                         value = float(line.split(":")[1].strip())
                         speed = round(value / 1024, 1)
                         self.crash_report_system_info["CPU Speed (Ghz)"] = speed
