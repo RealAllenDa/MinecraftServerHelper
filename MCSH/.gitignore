@@ -1,2 +1,3 @@
 crash_report/
 logs/
+__pycache__/

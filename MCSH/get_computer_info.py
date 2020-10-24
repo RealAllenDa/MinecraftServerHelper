@@ -5,6 +5,7 @@
  Licensed under MIT.
  ***************************************
  Module name: MCSH.get_computer_info
+ Module Revision: 0.0.1-16
  Module Description:
     To get some essential information in order to run 'Performance Tester'.
     Also, when MCSH crashed, can be used for 'System Information' section.
@@ -14,32 +15,33 @@
  -------------------- MODULE CAUTION --------------------
  WARNING:   This module contains some registry operations in Windows.
             Any improper modifying, corrupting, changing a specific value in this module
-            may cause serious errors, even fatal ones, not allowing the system to boot.
+            may cause serious errors, probably fatal ones, not allowing the system to boot.
             Please, don't change anything UNLESS you know what you're doing!
 
  WARNING:   This module, if not used properly, CAN cause damage to the computer.
 """
 import fileinput
-import hashlib
 import platform
 import sys
-import winreg
 
+try:
+    import winreg
+except:
+    pass
 import psutil
 
-from MCSH.config import MCSH_version
-from MCSH.logging import log
+from MCSH.consts import MCSH_version
+from MCSH.logging import log, crash
 
 
 class ComputerInfo:
     def __init__(self):
         """
         computer_info: A detailed computer information.
-        files_to_md5: See get_MCSH_checksum function.
+        crash_report_system_info: To be used in 'System Detailed' in crash reports.
         """
         self.crash_report_system_info = {}
         self.computer_info = {}
-        self.files_to_md5 = ["MCSH/config.py", "MCSH/get_computer_info.py", "MCSH/init.py", "MCSH/logging.py"]
 
     def _pre_check_req_python(self):
         """
@@ -47,48 +49,61 @@ class ComputerInfo:
         If not, raise an Exception.
         """
         if sys.version_info.major >= 3 and sys.version_info.minor >= 7:
-            return True
+            return
         else:
-            return False
+            log("computer_pre_check", "FATAL", "Python version doesn't meet requirements. Requires 3.7 or higher.")
+            crash({
+                "description": "Computer didn't pass pre-check.",
+                "exception": "Python version mismatch "
+                             "(Current={}.{}, Required=3.7+)".format(
+                    sys.version_info.major,
+                    sys.version_info.minor
+                ),
+                "computer_info": None
+            })
 
-    def get_MCSH_version(self):
+    def _pre_check_req_system(self):
+        """
+        Pre-check the system if it meets requirements in the README.md.
+        Required: Linux or Windows or Mac.
+        """
+        if platform.system() == "Linux":
+            self.computer_info["platform"] = "Linux"
+        elif platform.system() == "Windows":
+            self.computer_info["platform"] = "Windows"
+        elif platform.system() == "Mac":
+            self.computer_info["platform"] = "Mac"
+        else:
+            log("computer_pre_check", "FATAL", "The computer's platform doesn't met the requirements.\n"
+                                               "MCSH requires Windows, Mac or Linux to run.")
+            crash({
+                "description": "Computer didn't pass pre-check.",
+                "exception": "Platform mismatch "
+                             "(Current={}, Required=Linux,Windows,Mac)".format(
+                    platform.system()
+                ),
+                "computer_info": None
+            })
+
+    def _get_MCSH_version(self):
         """
         Get the MCSH version.
         """
         self.crash_report_system_info["MCSH Version"] = MCSH_version
 
-    def get_MCSH_checksum(self):
-        """
-        Get the checksum of important files.
-        File list:
-            - config.py
-            - get_computer_info.py
-            - init.py
-            - logging.py
-        """
-        self.crash_report_system_info["MCSH File Checksums"] = {}
-        try:
-            for i in self.files_to_md5:
-                with open(i, 'rb') as f:
-                    data = f.read()
-                    self.crash_report_system_info["MCSH File Checksums"][i] = hashlib.md5(data).hexdigest()
-                    f.close()
-        except:
-            self.crash_report_system_info["MCSH File Checksums"] = "Failed to get checksums for files."
-
-    def get_operating_system(self):
+    def _get_operating_system(self):
         """
         Get the detailed operating system.
         """
         self.crash_report_system_info["Operating System"] = platform.platform()
 
-    def get_python_version(self):
+    def _get_python_version(self):
         """
         Get the Python version.
         """
         self.crash_report_system_info["Python version"] = sys.version
 
-    def get_memory(self):
+    def _get_memory(self):
         """
         Get the memory size.
         """
@@ -102,14 +117,14 @@ class ComputerInfo:
         })
         self.computer_info["memory_total"] = round(mem.total / 1024 / 1024 / 1024)
 
-    def get_cpu_count(self):
+    def _get_cpu_count(self):
         """
-        Get the CPU count.
+        Get the CPU counts.
         """
         self.crash_report_system_info["CPU Count"] = psutil.cpu_count()
         self.computer_info["cpu"] = psutil.cpu_count()
 
-    def get_argv(self):
+    def _get_argv(self):
         """
         Get the arguments (argv).
         """
@@ -118,7 +133,7 @@ class ComputerInfo:
         except:
             self.crash_report_system_info["Startup Arguments"] = "Unknown"
 
-    def get_cpu_speed(self):
+    def _get_cpu_speed(self):
         """
         WARNING: This function contains registry operation in Windows.
         Please, don't change anything unless you know what you're doing!
@@ -156,16 +171,15 @@ class ComputerInfo:
         The main function of this module.
         Gets all the information.
         """
-        if not self._pre_check_req_python():
-            raise Exception("Python version doesn't meet requirements. Requires 3.7 or higher.")
-        self.get_MCSH_version()
-        self.get_MCSH_checksum()
-        self.get_operating_system()
-        self.get_python_version()
-        self.get_memory()
-        self.get_cpu_count()
-        self.get_argv()
-        getCPUSpeed = self.get_cpu_speed()
+        self._pre_check_req_python()
+        self._pre_check_req_system()
+        self._get_MCSH_version()
+        self._get_operating_system()
+        self._get_python_version()
+        self._get_memory()
+        self._get_cpu_count()
+        self._get_argv()
+        getCPUSpeed = self._get_cpu_speed()
         if not getCPUSpeed or self.crash_report_system_info["CPU Speed (Ghz)"] == "Unable to read":
             log("get_computer_info", "WARNING", "Can't determine CPU speed "
                                                 "(Probably using platforms except Linux and Windows). "

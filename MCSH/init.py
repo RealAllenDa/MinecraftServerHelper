@@ -5,6 +5,7 @@
  Licensed under MIT.
  ***************************************
  Module name: MCSH.init
+ Module Revision: 0.0.1-16
  Module Description:
     Handles all initializing things.
 """
@@ -12,7 +13,6 @@ import os
 
 from MCSH.config import Config
 from MCSH.first_time_setup import startup_guide
-from MCSH.get_computer_info import ComputerInfo
 from MCSH.logging import initialize_logger
 
 config_instance = None
@@ -30,12 +30,8 @@ def init():
         first_time_setup = True
     # Logger Module
     initialize_logger()
-    # Computer Info Module
-    computer_info_instance = ComputerInfo()
-    computer_info_instance.get_computer_info()
     # Config Module
     config_instance = Config()
-    config_instance.parser_init()
     config_instance.parser_parse()
     # Start first-time setup routine (If first_time_setup is True)
     if first_time_setup:

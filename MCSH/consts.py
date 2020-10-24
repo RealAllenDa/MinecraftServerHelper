@@ -4,12 +4,9 @@
  Coded by AllenDa 2020.
  Licensed under MIT.
  ***************************************
- Module name: MCSH.first_time_setup
+ Module Name: MCSH.consts
  Module Revision: 0.0.1-16
  Module Description:
-    Guides the user through first-time setup routines.
+    A module that stores all consts.
 """
-
-
-def startup_guide():
-    print("hello")
+MCSH_version = "MCSH v0.0.1-InEDev"

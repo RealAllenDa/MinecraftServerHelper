@@ -30,9 +30,8 @@ Now, a first-time run wizard should appear. Choose the language, and the program
 Run the program again, then you shall see the help message.
 
 # Compatibility
-The MCSH is (theoretically) compatible with all systems running Python, but some of the functionalities may be limited.
-
-For example, the *Performance Tester* may only run on Linux and Windows platform.
+The MCSH is (theoretically) compatible with all systems running Python, but for compatibility consideration, it's only
+designed to be run in Linux, Windows, and Mac.
 
 # Command line tools
 

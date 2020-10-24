@@ -5,17 +5,17 @@
  Licensed under MIT.
  ***************************************
  Module Name: MCSH.config
+ Module Revision: 0.0.1-16
  Module Description:
     A module that stores all the configuration needed for MCSH.
     Main argparse module for MCSH.
 """
 import argparse
 import json
-import sys
 
-from MCSH.logging import log
-
-MCSH_version = "MCSH v0.0.1-InEDev"
+from MCSH.consts import MCSH_version
+from MCSH.get_computer_info import ComputerInfo
+from MCSH.logging import log, crash
 
 
 class Config:
@@ -25,36 +25,89 @@ class Config:
 
     def __init__(self):
         """
-        Initialize for the config.
+        Initialize configurations.
         """
-        # Initialize config
+        # Set all variables to none
+        self.program_config_file = None
+        self.program_config = None
+        self.locale = None
+        self.locale_file = None
+        self.locale_dict = None
+        self.parser = None
+        self.parser_args = None
+        self.operations = None
+        self.parse_sequence = None
+        self.execute_command = None
+        self.computer_info = None
+        self.crash_info = None
+        # Call functions for initializing.
+        self._init_computer_info()
+        self._init_program_config()
+        self._init_locale()
+        self._init_parser()
+        self._config_parser()
+
+    def _init_computer_info(self):
+        computer_info_instance = ComputerInfo()
+        computer_info_instance.get_computer_info()
+        self.computer_info = computer_info_instance.computer_info
+        self.crash_info = computer_info_instance.crash_report_system_info
+
+    def _init_program_config(self):
+        """
+        Read program config json.
+        """
         try:
             self.program_config_file = open("MCSH/config/MCSH.json")
             self.program_config = json.loads(self.program_config_file.read())
             self.program_config_file.close()
         except:
             log("initialize_config", "WARNING", "The file {file_name} ({file_path}) is missing or corrupted. "
-                                                "Trying to retrieve a new one from the repo...".format(
+                                                "Trying to get a new one from the repo...".format(
                 **{"file_name": "MCSH.json", "file_path": "MCSH/config/MCSH.json"}))
-        # Initialize locales
+            # TODO: Repo get
+
+    def _init_locale(self):
+        """
+        Read program locale config.
+        """
         self.locale = self.program_config["locale"]
         try:
             self.locale_file = open("MCSH/locale/{}.json".format(self.locale), encoding="utf-8")
             self.locale_dict = json.loads(self.locale_file.read())
             self.locale_file.close()
         except:
-            log("initialize_locale", "FATAL", "FATAL ERROR during pre-initialization:\n"
-                                              "Unable to load locale file.\n"
+            log("initialize_locale", "FATAL", "Unable to load locale file.\n"
                                               "This could be triggered by an improper installation and/or upgrade.\n"
                                               "Please reinstall MCSH.")
-            sys.exit(2)
+            crash({
+                "description": "Unable to load locale file.",
+                "exception": "Unable to load locale file. "
+                             "Locale file had been corrupted. "
+                             "Please reinstall MCSH.",
+                "computer_info": self.crash_info
+            })
         # Detect the version of the locale file.
         # If it's outdated, raise a fatal error.
         if self.locale_dict["version"] != MCSH_version:
             log("initialize_locale", "FATAL", self.locale_dict["exceptions"]["fatal_lang_version_mismatch"].format(
                 **{"program": MCSH_version,
                    "locale": self.locale_dict["version"]}))
-            sys.exit(2)
+            crash({
+                "description": "Unable to load locale file.",
+                "exception": "Unable to load locale file. "
+                             "Locale file is outdated. "
+                             "(reported_version={}, mcsh_version={})".format(
+                    self.locale_dict["version"],
+                    MCSH_version
+                ),
+                "computer_info": self.crash_info
+            })
+
+    def _init_parser(self):
+        """
+        Initialize parsers.
+        """
         # Initialize parsers
         # noinspection PyTypeChecker
         self.parser = argparse.ArgumentParser(add_help=False,
@@ -67,9 +120,9 @@ class Config:
                                "repolist", "reposearch", "reposhow"]
         self.execute_command = None
 
-    def parser_init(self):
+    def _config_parser(self):
         """
-        Set the commands for the parser.
+        Config commands for the parser.
         """
         self.operations.add_argument("--version", action="version", version=MCSH_version,
                                      help=self.locale_dict["parser"]["helps"]["version"])
@@ -109,6 +162,6 @@ class Config:
                 self.execute_command = i + "({})".format(eval("self.parser_args." + i))
                 break
         if self.execute_command is None:
-            log("parse_command", "FATAL", "Error: no commands specified.")
+            log("parse_command", "ERROR", "No command specified.")
             self.parser.print_help()
         print(self.execute_command)

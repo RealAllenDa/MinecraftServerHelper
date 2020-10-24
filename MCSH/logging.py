@@ -5,12 +5,16 @@
  Licensed under MIT.
  ***************************************
  Module Name: MCSH.logging
+ Module Revision: 0.0.1-16
  Module Description:
     A module for all the shared functions.
     Including Logging, Downloading, etc.
 """
 import os
+import tarfile
 import time
+
+from MCSH.crash_report import generate_crash_report
 
 logging_file_name = ""
 
@@ -55,6 +59,14 @@ def log(log_module, log_severity, log_text):
         print(log_formatted_output)
 
 
+def crash(crash_info):
+    log("crash_watchdog", "FATAL", "MCSH had crashed!\n"
+                                   "For detailed information, "
+                                   "see crash reports under ./MCSH/crash_report folder.")
+    generate_crash_report(crash_info["description"],
+                          crash_info["exception"],
+                          crash_info["computer_info"])
+
 def initialize_logger():
     """
     Initialize the logging file handler.
@@ -65,14 +77,21 @@ def initialize_logger():
     # First-time initialization
     if not os.path.exists(path):
         os.mkdir(path)
-    # Auto-cleaning logs
-    if len([lists for lists in os.listdir(path) if os.path.isfile(os.path.join(path, lists))]) >= 10:
-        for lists in os.listdir(path):
-            log_file_path = os.path.join(path, lists)
-            try:
-                os.remove(log_file_path)
-            except:
-                pass
+    # Auto-packing logs
+    if len([lists for lists in os.listdir(path) if os.path.isfile(os.path.join(path, lists))]) >= 2:
+        try:
+            tar = tarfile.open("./MCSH/logs/pack.tar.gz", "w:gz")
+            for root, directory, files in os.walk("./MCSH/logs"):
+                print(root, directory, files)
+                for file in files:
+                    if file != "pack.tar.gz":
+                        file_path = os.path.join(root, file)
+                        print(file_path)
+                        tar.add(file_path, arcname=file)
+                        os.remove(file_path)
+            tar.close()
+        except:
+            print("Failed to pack logs. Please delete logs manually under ./MCSH/logs.")
     # Set the logging file name
     global logging_file_name
     logging_file_name = "{}/{}.log".format(path, time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()))
