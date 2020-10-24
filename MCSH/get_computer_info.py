@@ -101,7 +101,7 @@ class ComputerInfo:
         """
         Get the Python version.
         """
-        self.crash_report_system_info["Python version"] = sys.version
+        self.crash_report_system_info["Python version"] = sys.version.replace('\n', '').replace('\r', '')
 
     def _get_memory(self):
         """
