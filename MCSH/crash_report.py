@@ -19,8 +19,10 @@ import time
 
 def generate_crash_report(crash_description, crash_detailed_exception, computer_crash_info):
     """
-    Generate a crash report using English.
+    Generate a crash report in English.
     """
+    if not os.path.exists("./MCSH/crash_report"):
+        os.mkdir("./MCSH/crash_report")
     if len(
             [lists for lists in os.listdir("./MCSH/crash_report")
              if os.path.isfile(os.path.join("./MCSH/crash_report", lists))]
