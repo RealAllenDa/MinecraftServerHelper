@@ -1,8 +1,8 @@
 """
  ***************************************
  MCSH - A Minecraft Server Helper.
- Licensed under GPL-1.0.
- Copyleft AllenDa 2020.
+ Coded by AllenDa 2020.
+ Licensed under MIT.
  ***************************************
  Module Description:
     The entrance for the package.
