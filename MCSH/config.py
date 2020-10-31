@@ -5,13 +5,14 @@
  Licensed under MIT.
  ***************************************
  Module Name: MCSH.config
- Module Revision: 0.0.1-16
+ Module Revision: 0.0.1-17
  Module Description:
     A module that stores all the configuration needed for MCSH.
     Main argparse module for MCSH.
 """
 import argparse
 import json
+import traceback
 
 from MCSH.consts import MCSH_version
 from MCSH.get_computer_info import ComputerInfo
@@ -48,6 +49,9 @@ class Config:
         self._config_parser()
 
     def _init_computer_info(self):
+        """
+        Initialize computer info module.
+        """
         computer_info_instance = ComputerInfo()
         computer_info_instance.get_computer_info()
         self.computer_info = computer_info_instance.computer_info
@@ -61,12 +65,12 @@ class Config:
             self.program_config_file = open("MCSH/config/MCSH.json")
             self.program_config = json.loads(self.program_config_file.read())
             self.program_config_file.close()
-        except:
+        except Exception as e:
             log("initialize_config", "WARNING", "The file {file_name} ({file_path}) is missing or corrupted. "
-                                                "Trying to get a new one from the repo...".format(
+                                                "Trying to generate a new one...".format(
                 **{"file_name": "MCSH.json", "file_path": "MCSH/config/MCSH.json"}))
-            # TODO: Repo get
-
+            self._generate_config()
+            self._init_program_config()
     def _init_locale(self):
         """
         Read program locale config.
@@ -76,7 +80,7 @@ class Config:
             self.locale_file = open("MCSH/locale/{}.json".format(self.locale), encoding="utf-8")
             self.locale_dict = json.loads(self.locale_file.read())
             self.locale_file.close()
-        except:
+        except Exception as e:
             log("initialize_locale", "FATAL", "Unable to load locale file.\n"
                                               "This could be triggered by an improper installation and/or upgrade.\n"
                                               "Please reinstall MCSH.")
@@ -85,7 +89,8 @@ class Config:
                 "exception": "Unable to load locale file. "
                              "Locale file had been corrupted. "
                              "Please reinstall MCSH.",
-                "computer_info": self.crash_info
+                "computer_info": self.crash_info,
+                "program_traceback": traceback.format_exc()
             })
         # Detect the version of the locale file.
         # If it's outdated, raise a fatal error.
@@ -102,6 +107,23 @@ class Config:
                     MCSH_version
                 ),
                 "computer_info": self.crash_info
+            })
+    def _generate_config(self):
+        # TODO: Update from version to version
+        config_file_content = {
+            "version": "MCSH v0.0.1-InEDev",
+            "locale": "en_us"
+        }
+        try:
+            with open("MCSH/config/MCSH.json", "w+") as f:
+                f.write(json.dumps(config_file_content))
+                f.close()
+        except Exception as e:
+            crash({
+                "description": "Unable to generate config file.",
+                "exception": "Unable to generate config file.",
+                "computer_info": self.crash_info,
+                "program_traceback": traceback.format_exc()
             })
 
     def _init_parser(self):

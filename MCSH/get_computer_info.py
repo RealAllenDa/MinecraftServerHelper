@@ -5,20 +5,13 @@
  Licensed under MIT.
  ***************************************
  Module name: MCSH.get_computer_info
- Module Revision: 0.0.1-16
+ Module Revision: 0.0.1-17
  Module Description:
     To get some essential information in order to run 'Performance Tester'.
     Also, when MCSH crashed, can be used for 'System Information' section.
     Because Linux and Windows handles information in very different ways,
     I had to split the way of getting information for different platforms.
     That means you can't run it on other platforms except for Windows and Linux.
- -------------------- MODULE CAUTION --------------------
- WARNING:   This module contains some registry operations in Windows.
-            Any improper modifying, corrupting, changing a specific value in this module
-            may cause serious errors, probably fatal ones, not allowing the system to boot.
-            Please, don't change anything UNLESS you know what you're doing!
-
- WARNING:   This module, if not used properly, CAN cause damage to the computer.
 """
 import fileinput
 import platform

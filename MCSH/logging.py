@@ -5,7 +5,7 @@
  Licensed under MIT.
  ***************************************
  Module Name: MCSH.logging
- Module Revision: 0.0.1-16
+ Module Revision: 0.0.1-17
  Module Description:
     A module for all the shared functions.
     Including Logging, Downloading, etc.
@@ -60,12 +60,22 @@ def log(log_module, log_severity, log_text):
 
 
 def crash(crash_info):
+    """
+    Handle all crashing.
+    """
     log("crash_watchdog", "FATAL", "MCSH had crashed!\n"
                                    "For detailed information, "
                                    "see crash reports under ./MCSH/crash_report folder.")
+    try:
+        program_traceback = crash_info["program_traceback"]
+    except KeyError:
+        program_traceback = "MCSH program exception"
+    except:
+        program_traceback = "Unknown exception occurred in crash watchdog."
     generate_crash_report(crash_info["description"],
                           crash_info["exception"],
-                          crash_info["computer_info"])
+                          crash_info["computer_info"],
+                          program_traceback)
 
 def initialize_logger():
     """
@@ -78,15 +88,13 @@ def initialize_logger():
     if not os.path.exists(path):
         os.mkdir(path)
     # Auto-packing logs
-    if len([lists for lists in os.listdir(path) if os.path.isfile(os.path.join(path, lists))]) >= 2:
+    if len([lists for lists in os.listdir(path) if os.path.isfile(os.path.join(path, lists))]) >= 10:
         try:
             tar = tarfile.open("./MCSH/logs/pack.tar.gz", "w:gz")
             for root, directory, files in os.walk("./MCSH/logs"):
-                print(root, directory, files)
                 for file in files:
                     if file != "pack.tar.gz":
                         file_path = os.path.join(root, file)
-                        print(file_path)
                         tar.add(file_path, arcname=file)
                         os.remove(file_path)
             tar.close()

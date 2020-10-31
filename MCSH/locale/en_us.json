@@ -1,5 +1,5 @@
 {
-  "version": "MCSH v0.0.1-InE2Dev",
+  "version": "MCSH v0.0.1-InEDev",
   "parser": {
     "description": "A Minecraft Server Helper.",
     "epilog": "NOTE: The MCSH will only execute command by the sequence mentioned above.\ne.g. mcsh-cli.py --remove --install, MCSH will only execute --install, not --remove.\nFor more detailed help, see README.md in the root folder.",

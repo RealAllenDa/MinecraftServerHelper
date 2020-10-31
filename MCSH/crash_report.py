@@ -5,7 +5,7 @@
  Licensed under MIT.
  ***************************************
  Module name: MCSH.crash_report
- Module Revision: 0.0.1-16
+ Module Revision: 0.0.1-17
  Module Description:
     Generates the crash report for MCSH.
     Considering crashes during the PRE-INITIALIZATION, it will NOT use the locale file.
@@ -17,7 +17,7 @@ import tarfile
 import time
 
 
-def generate_crash_report(crash_description, crash_detailed_exception, computer_crash_info):
+def generate_crash_report(crash_description, crash_detailed_exception, computer_crash_info, program_traceback):
     """
     Generate a crash report in English.
     """
@@ -45,6 +45,9 @@ Description: {description}
 
 {detailed_exception}
 
+Program Traceback:
+{program_traceback}
+
 -- System Details --
 Details:
 {computer_crash_info}
@@ -65,7 +68,8 @@ Details:
         "process_time": time.process_time(),
         "description": crash_description,
         "detailed_exception": crash_detailed_exception,
-        "computer_crash_info": formatted_crash_info
+        "computer_crash_info": formatted_crash_info,
+        "program_traceback": program_traceback
     })
     if not os.path.exists("./MCSH/crash_report"):
         try:
