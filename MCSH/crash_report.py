@@ -15,7 +15,7 @@ import os
 import sys
 import tarfile
 import time
-
+from MCSH.consts import CRASH_REPORT_FORMAT
 
 def generate_crash_report(crash_description, crash_detailed_exception, computer_crash_info, program_traceback):
     """
@@ -38,20 +38,7 @@ def generate_crash_report(crash_description, crash_detailed_exception, computer_
             tar.close()
         except Exception as e:
             print("[??-??] [crash_report/ERROR]: Failed to pack crash reports.")
-    CRASH_REPORT_FORMAT = '''---- MCSH Crash Report ----
-Time: {time}
-Process Time: {process_time}
-Description: {description}
 
-{detailed_exception}
-
-Program Traceback:
-{program_traceback}
-
--- System Details --
-Details:
-{computer_crash_info}
-'''
     formatted_crash_info = ""
     crash_report_filename = "CRASH_" + time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()) + ".log"
     if computer_crash_info is None:

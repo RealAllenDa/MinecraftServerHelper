@@ -15,7 +15,7 @@ import tarfile
 import time
 
 from MCSH.crash_report import generate_crash_report
-
+from MCSH.consts import LOGGING_COLORS
 logging_file_name = ""
 
 
@@ -25,15 +25,8 @@ def log(log_module, log_severity, log_text):
     The logging function for MCSH.
     log_severity: FATAL, ERROR, WARNING, INFO, DEBUG
     """
-    COLORS = {
-        "FATAL": "\033[1;37;41m",
-        "ERROR": "\033[31m",
-        "WARNING": "\033[33m",
-        "INFO": "",
-        "DEBUG": "\033[32m"
-    }
     try:
-        log_color = COLORS[log_severity]
+        log_color = LOGGING_COLORS[log_severity]
     except:
         log_color = ""
     log_text_lines = log_text.split("\n")
