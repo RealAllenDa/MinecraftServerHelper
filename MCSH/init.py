@@ -17,7 +17,6 @@ from MCSH.logging import initialize_logger
 
 config_instance = None
 computer_info_instance = None
-first_time_setup = False
 
 
 def init():
@@ -25,14 +24,13 @@ def init():
     Initializes all modules.
     """
     global config_instance, computer_info_instance, first_time_setup
-    # If it's first time to run this program
-    if not os.path.exists("./MCSH/logs"):
-        first_time_setup = True
     # Logger Module
     initialize_logger()
-    # Config Module
-    config_instance = Config()
-    config_instance.parser_parse()
-    # Start first-time setup routine (If first_time_setup is True)
-    if first_time_setup:
+    # If it's first time to run this program
+    if not os.path.exists("./MCSH/logs") or not os.path.exists("./MCSH/config/MCSH.json"):
+        config_instance = Config(flag_first_time_start=True)
         startup_guide()
+    else:
+        # Config Module
+        config_instance = Config()
+        config_instance.parser_parse()

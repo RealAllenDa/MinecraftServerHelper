@@ -9,6 +9,7 @@
  Module Description:
     A module that stores all consts.
 """
+DEBUG = True
 MCSH_version = "MCSH v0.0.1-InEDev"
 CRASH_REPORT_FORMAT = '''---- MCSH Crash Report ----
 Time: {time}

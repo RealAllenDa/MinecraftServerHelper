@@ -24,7 +24,7 @@ class Config:
     The main config class for MCSH.
     """
 
-    def __init__(self):
+    def __init__(self, flag_first_time_start=False):
         """
         Initialize configurations.
         """
@@ -43,10 +43,11 @@ class Config:
         self.crash_info = None
         # Call functions for initializing.
         self._init_computer_info()
-        self._init_program_config()
-        self._init_locale()
-        self._init_parser()
-        self._config_parser()
+        if not flag_first_time_start:
+            self._init_program_config()
+            self._init_locale()
+            self._init_parser()
+            self._config_parser()
 
     def _init_computer_info(self):
         """

@@ -18,4 +18,9 @@ def startup_guide():
         Check pre.req., Generate config, Evaluate computer.
     """
     log("first_time_setup", "DEBUG", "Initializing first-time setup guide...")
-    print("\033[")
+    # Pre-requirements check
+    pass
+    # Config generation
+    pass
+    # Computer evaluation
+def _check_pre_requirements():

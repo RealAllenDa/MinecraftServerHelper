@@ -15,7 +15,7 @@ import tarfile
 import time
 
 from MCSH.crash_report import generate_crash_report
-from MCSH.consts import LOGGING_COLORS
+from MCSH.consts import LOGGING_COLORS, DEBUG
 logging_file_name = ""
 
 
@@ -49,7 +49,12 @@ def log(log_module, log_severity, log_text):
                 f.close()
             except:
                 pass
-        print(log_formatted_output)
+        # If DEBUG is False, don't output debug messages
+        if log_severity == "DEBUG":
+            if DEBUG:
+                print(log_formatted_output)
+        else:
+            print(log_formatted_output)
 
 
 def crash(crash_info):
