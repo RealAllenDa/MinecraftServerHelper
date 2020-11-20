@@ -21,7 +21,11 @@ try:
     import winreg
 except:
     pass
-import psutil
+try:
+    import psutil
+except:
+    raise Exception("Pre-initialization error: module 'psutil' not found. "
+                    "Run 'pip install -r requirements.txt' under the root folder and try again.")
 
 from MCSH.consts import MCSH_version
 from MCSH.logging import log, crash

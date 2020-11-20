@@ -10,17 +10,21 @@
     Guides the user through first-time setup routines.
 """
 from MCSH.logging import log
+from MCSH.consts import config_instance
 
 def startup_guide():
     """
     The entrance of the startup guide.
     Included parts:
-        Check pre.req., Generate config, Evaluate computer.
+        Language, Check pre.req., Generate config, Evaluate computer.
     """
     log("first_time_setup", "DEBUG", "Initializing first-time setup guide...")
+    log("first_time_setup", "DEBUG", "[Step 1/4] Generating general config file...")
+    print(config_instance)
     # Pre-requirements check
-    pass
-    # Config generation
     pass
     # Computer evaluation
 def _check_pre_requirements():
+    log("first_time_setup", "DEBUG", "[Step 2/4] Checking pre-requirements...")
+def _evaluate_computer():
+    log("first_time_setup", "DEBUG", "[Step 3/4] Evaluating computer...")

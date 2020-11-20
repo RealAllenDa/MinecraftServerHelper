@@ -22,6 +22,7 @@ Then, cd to that directory and run 'mcsh-cli.py' using your Python:
 
 ```bash
 cd MinecraftServerHelper
+pip instal -r requirements.txt
 python mcsh-cli.py
 ```
 

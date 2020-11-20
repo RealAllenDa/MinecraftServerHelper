@@ -14,10 +14,7 @@ import os
 from MCSH.config import Config
 from MCSH.first_time_setup import startup_guide
 from MCSH.logging import initialize_logger
-
-config_instance = None
-computer_info_instance = None
-
+import MCSH.consts as consts
 
 def init():
     """
@@ -28,9 +25,9 @@ def init():
     initialize_logger()
     # If it's first time to run this program
     if not os.path.exists("./MCSH/logs") or not os.path.exists("./MCSH/config/MCSH.json"):
-        config_instance = Config(flag_first_time_start=True)
+        consts.config_instance = Config(flag_first_time_start=True)
         startup_guide()
     else:
         # Config Module
-        config_instance = Config()
-        config_instance.parser_parse()
+        consts.config_instance = Config()
+        consts.config_instance.parser_parse()

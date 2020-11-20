@@ -36,3 +36,5 @@ LOCALES_AVAIL = [
     "中文（zh-cn）",
     "English (en-us)"
 ]
+config_instance = None
+computer_info_instance = None
