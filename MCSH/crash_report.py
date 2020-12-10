@@ -5,7 +5,7 @@
  Licensed under MIT.
  ***************************************
  Module name: MCSH.crash_report
- Module Revision: 0.0.1-17
+ Module Revision: 0.0.1-18
  Module Description:
     Generates the crash report for MCSH.
     Considering crashes during the PRE-INITIALIZATION, it will NOT use the locale file.
@@ -15,7 +15,9 @@ import os
 import sys
 import tarfile
 import time
+
 from MCSH.consts import CRASH_REPORT_FORMAT
+
 
 def generate_crash_report(crash_description, crash_detailed_exception, computer_crash_info, program_traceback):
     """
@@ -43,7 +45,7 @@ def generate_crash_report(crash_description, crash_detailed_exception, computer_
     crash_report_filename = "CRASH_" + time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()) + ".log"
     if computer_crash_info is None:
         formatted_crash_info = "??? (Crashes during pre-initialization)"
-    if formatted_crash_info != "??? (Crashes during pre-initialization)":
+    else:
         for key in computer_crash_info.keys():
             formatted_info = "  {key}: {content}\n".format(**{
                 "key": key,

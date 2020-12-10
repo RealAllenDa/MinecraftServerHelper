@@ -5,7 +5,7 @@
  Licensed under MIT.
  ***************************************
  Module Name: MCSH.logging
- Module Revision: 0.0.1-17
+ Module Revision: 0.0.1-18
  Module Description:
     A module for all the shared functions.
     Including Logging, Downloading, etc.
@@ -14,8 +14,9 @@ import os
 import tarfile
 import time
 
-from MCSH.crash_report import generate_crash_report
 from MCSH.consts import LOGGING_COLORS, DEBUG
+from MCSH.crash_report import generate_crash_report
+
 logging_file_name = ""
 
 
@@ -29,6 +30,8 @@ def log(log_module, log_severity, log_text):
         log_color = LOGGING_COLORS[log_severity]
     except:
         log_color = ""
+    # Convert to string
+    log_text = str(log_text)
     log_text_lines = log_text.split("\n")
     for log_text in log_text_lines:
         log_formatted_text = "[{time}-{process_time}] [{log_module}/{log_severity}]: {log}".format(**{
