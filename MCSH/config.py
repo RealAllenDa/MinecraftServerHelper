@@ -14,7 +14,7 @@ import argparse
 import json
 import traceback
 
-from MCSH.consts import MCSH_version
+from MCSH.consts import MCSH_version, DEBUG
 from MCSH.get_computer_info import ComputerInfo
 from MCSH.logging import log, crash
 
@@ -53,15 +53,13 @@ class Config:
             self._config_parser()
         log(MODULE_NAME, "DEBUG", "-- Config Summary --\n"
                                   "program_config: {}\n"
-                                  "locale_dict: {}\n"
-                                  "parser_args: {}\n"
-                                  "execute_command: {}\n"
+                                  "locale: {} ({})\n"
                                   "computer_info: {}\n"
                                   "crash_info: {}\n"
-                                  "first_time_startup: {}".format(self.program_config, self.locale_dict,
-                                                                  self.parser_args, self.execute_command,
+                                  "first_time_startup: {}\n"
+                                  "DEBUG: {}".format(self.program_config, self.locale, self.locale_file,
                                                                   self.computer_info, self.crash_info,
-                                                                  flag_first_time_start))
+                                                                  flag_first_time_start, DEBUG))
 
     def _init_computer_info(self):
         """
@@ -192,13 +190,27 @@ class Config:
                                      help=self.locale_dict["parser"]["helps"]["reposearch"])
         self.operations.add_argument("--reposhow", nargs=1, metavar="ServerName",
                                      help=self.locale_dict["parser"]["helps"]["reposhow"])
+        # Commands used JUST FOR DEBUGGING
+        self.operations.add_argument("--debugging-crash", action="store_true",
+                                     help=argparse.SUPPRESS)
 
     def parser_parse(self):
         """
         Parse the args the user had entered.
         """
+        debug_args_selected = False
         log(MODULE_NAME, "DEBUG", "Parsing arguments...")
         self.parser_args = self.parser.parse_args()
+        # DEBUGGING ARGUMENTS
+        if self.parser_args.debugging_crash:
+            debug_args_selected = True
+            # TODO: Move to another debugging place
+            crash({
+                "description": "Manually triggered crash",
+                "exception": "UNKNOWN (Manually triggered crash)",
+                "computer_info": self.crash_info
+            })
+        # Normal Parsing
         for i in self.parse_sequence:
             if eval("self.parser_args." + i) is True:
                 self.execute_command = i
@@ -206,7 +218,11 @@ class Config:
             elif eval("self.parser_args." + i) is not None and eval("self.parser_args." + i) is not False:
                 self.execute_command = i + "({})".format(eval("self.parser_args." + i))
                 break
-        if self.execute_command is None:
+        if self.execute_command is None and debug_args_selected is False:
             log(MODULE_NAME, "ERROR", "No command specified.")
             self.parser.print_help()
+        log(MODULE_NAME, "DEBUG", "-- Parser Summary --\n"
+                                  "parser_args: {}\n"
+                                  "execute_command: {}\n"
+                                  "parse_sequence: {}".format(self.parser_args, self.execute_command, self.parse_sequence))
         print(self.execute_command)
