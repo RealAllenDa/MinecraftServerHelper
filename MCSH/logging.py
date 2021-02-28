@@ -14,21 +14,29 @@ import os
 import tarfile
 import time
 
-from MCSH.consts import LOGGING_COLORS, DEBUG
+from MCSH.consts import LOGGING_COLORS
 from MCSH.crash_report import generate_crash_report
 
 logging_file_name = ""
+DEBUG = False
+color_enabled = False
 
 
 # The logger in-program.
-def log(log_module, log_severity, log_text):
+def log(log_module, log_severity, log_text, override_color=False):
     """
     The logging function for MCSH.
     log_severity: FATAL, ERROR, WARNING, INFO, DEBUG
     """
     try:
-        log_color = LOGGING_COLORS[log_severity]
+        if color_enabled:
+            log_color = LOGGING_COLORS[log_severity]
+        else:
+            log_color = ""
     except:
+        log_color = ""
+    # Color override (in case config isn't here)
+    if override_color:
         log_color = ""
     # Convert to string
     log_text = str(log_text)
@@ -84,10 +92,23 @@ def initialize_logger():
     Default log output directory: ./MCSH/logs
     Default log threshold: 10 logs
     """
+    global DEBUG, color_enabled
     path = "./MCSH/logs"
+    from MCSH.debug import debugging_check
+    DEBUG = debugging_check(suppress_warning=True)
     # First-time initialization
     if not os.path.exists(path):
         os.mkdir(path)
+    # Logging color detection
+    try:
+        from MCSH.consts import config_instance
+        with open("./MCSH/config/MCSH.json", "r") as f:
+            import json
+            temp_config = json.load(f)
+            f.close()
+        color_enabled = bool(temp_config["color_enabled"])
+    except:
+        color_enabled = False
     # Auto-packing logs
     if len([lists for lists in os.listdir(path) if os.path.isfile(os.path.join(path, lists))]) >= 10:
         try:

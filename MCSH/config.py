@@ -12,13 +12,16 @@
 """
 import argparse
 import json
+import os
 import traceback
 
-from MCSH.consts import MCSH_version, DEBUG
+from MCSH.consts import MCSH_version
+from MCSH.debug import debugging_check, debugging_parse
 from MCSH.get_computer_info import ComputerInfo
 from MCSH.logging import log, crash
 
 MODULE_NAME = "config"
+
 
 class Config:
     """
@@ -33,9 +36,6 @@ class Config:
         # Set all variables to none
         self.program_config_file = None
         self.program_config = None
-        self.locale = None
-        self.locale_file = None
-        self.locale_dict = None
         self.parser = None
         self.parser_args = None
         self.operations = None
@@ -43,23 +43,31 @@ class Config:
         self.execute_command = None
         self.computer_info = None
         self.crash_info = None
+        self.debug = False
+        self.first_time_start = flag_first_time_start
         # Call functions for initializing.
         self._init_computer_info()
-        if not flag_first_time_start:
-            log(MODULE_NAME, "DEBUG", "Not starting the first time -- initializing other things...")
-            self._init_program_config()
-            self._init_locale()
-            self._init_parser()
-            self._config_parser()
+        self._init_debug()
+        self._init_program_config()
         log(MODULE_NAME, "DEBUG", "-- Config Summary --\n"
                                   "program_config: {}\n"
-                                  "locale: {} ({})\n"
                                   "computer_info: {}\n"
                                   "crash_info: {}\n"
                                   "first_time_startup: {}\n"
-                                  "DEBUG: {}".format(self.program_config, self.locale, self.locale_file,
-                                                                  self.computer_info, self.crash_info,
-                                                                  flag_first_time_start, DEBUG))
+                                  "DEBUG: {}".format(self.program_config,
+                                                     self.computer_info, self.crash_info,
+                                                     self.first_time_start, self.debug))
+        log(MODULE_NAME, "DEBUG", "Starting parser...")
+        self._init_parser()
+        self._config_parser()
+
+    def _init_debug(self):
+        if debugging_check(suppress_warning=True):
+            log(MODULE_NAME, "DEBUG", "WARNING: Debugging features enabled.")
+            self.debug = True
+            self.crash_info["Debugging"] = True
+        else:
+            self.crash_info["Debugging"] = False
 
     def _init_computer_info(self):
         """
@@ -76,67 +84,41 @@ class Config:
         Read program config json.
         """
         log(MODULE_NAME, "DEBUG", "Reading program config...")
+        if self.first_time_start:
+            self._generate_config()
         try:
             self.program_config_file = open("MCSH/config/MCSH.json")
             self.program_config = json.loads(self.program_config_file.read())
             self.program_config_file.close()
-        except Exception as e:
+        except Exception:
             log("initialize_config", "WARNING", "The file {file_name} ({file_path}) is missing or corrupted. "
                                                 "Trying to generate a new one...".format(
                 **{"file_name": "MCSH.json", "file_path": "MCSH/config/MCSH.json"}))
             self._generate_config()
             self._init_program_config()
-    def _init_locale(self):
-        """
-        Read program locale config.
-        """
-        log(MODULE_NAME, "DEBUG", "Reading locale config...")
-        self.locale = self.program_config["locale"]
-        try:
-            self.locale_file = open("MCSH/locale/{}.json".format(self.locale), encoding="utf-8")
-            self.locale_dict = json.loads(self.locale_file.read())
-            self.locale_file.close()
-        except Exception as e:
-            log("initialize_locale", "FATAL", "Unable to load locale file.\n"
-                                              "This could be triggered by an improper installation and/or upgrade.\n"
-                                              "Please reinstall MCSH.")
-            crash({
-                "description": "Unable to load locale file.",
-                "exception": "Unable to load locale file. "
-                             "Locale file had been corrupted. "
-                             "Please reinstall MCSH.",
-                "computer_info": self.crash_info,
-                "program_traceback": traceback.format_exc()
-            })
-        # Detect the version of the locale file.
-        # If it's outdated, raise a fatal error.
-        log(MODULE_NAME, "DEBUG", "Checking locale file date...")
-        if self.locale_dict["version"] != MCSH_version:
-            log("initialize_locale", "FATAL", self.locale_dict["exceptions"]["fatal_lang_version_mismatch"].format(
-                **{"program": MCSH_version,
-                   "locale": self.locale_dict["version"]}))
-            crash({
-                "description": "Unable to load locale file.",
-                "exception": "Unable to load locale file. "
-                             "Locale file is outdated. "
-                             "(reported_version={}, mcsh_version={})".format(
-                    self.locale_dict["version"],
-                    MCSH_version
-                ),
-                "computer_info": self.crash_info
-            })
+
     def _generate_config(self):
         # TODO: Update from version to version
         log(MODULE_NAME, "DEBUG", "Generating a new config file...")
+        if self.first_time_start:
+            try:
+                os.mkdir("MCSH/config")
+            except Exception:
+                crash({
+                    "description": "Unable to create config directory.",
+                    "exception": "Unable to create config directory.",
+                    "computer_info": self.crash_info,
+                    "program_traceback": traceback.format_exc()
+                })
         config_file_content = {
             "version": "MCSH v0.0.1-InEDev",
-            "locale": "en_us"
+            "color_enabled": False
         }
         try:
             with open("MCSH/config/MCSH.json", "w+") as f:
                 f.write(json.dumps(config_file_content))
                 f.close()
-        except Exception as e:
+        except Exception:
             crash({
                 "description": "Unable to generate config file.",
                 "exception": "Unable to generate config file.",
@@ -144,19 +126,33 @@ class Config:
                 "program_traceback": traceback.format_exc()
             })
 
+    def update_config(self):
+        try:
+            with open("MCSH/config/MCSH.json", "w") as f:
+                f.write(json.dumps(self.program_config))
+                f.close()
+        except Exception:
+            print("Failed")
+
     def _init_parser(self):
         """
         Initialize parsers.
         """
+        if self.first_time_start:
+            log(MODULE_NAME, "DEBUG", "First time startup guide. Parser disabled.")
+            return
         # Initialize parsers
         log(MODULE_NAME, "DEBUG", "Initializing parsers...")
         # noinspection PyTypeChecker
         self.parser = argparse.ArgumentParser(add_help=False,
-                                              description=self.locale_dict["parser"]["description"],
-                                              epilog=self.locale_dict["parser"]["epilog"],
+                                              description="A Minecraft Server Helper.",
+                                              epilog="NOTE: The MCSH will only execute command by the sequence mentioned above.\n"
+                                                     "e.g. mcsh-cli.py --remove --install, MCSH will only execute --install, not --remove.\n"
+                                                     "For more detailed help, see README.md in the root folder.",
                                               formatter_class=argparse.RawTextHelpFormatter)
         self.parser_args = None
-        self.operations = self.parser.add_argument_group(title=self.locale_dict["parser"]["operations_title"])
+        self.operations = self.parser.add_argument_group(title="All MCSH Commands")
+        self.debug_operations = self.parser.add_argument_group(title="Debugging Commands")
         self.parse_sequence = ["install", "remove", "reinstall", "autoupdate", "upgrade", "download",
                                "repolist", "reposearch", "reposhow"]
         self.execute_command = None
@@ -165,51 +161,58 @@ class Config:
         """
         Config commands for the parser.
         """
+        if self.first_time_start:
+            return
         log(MODULE_NAME, "DEBUG", "Adding parser commands...")
         self.operations.add_argument("--version", action="version", version=MCSH_version,
-                                     help=self.locale_dict["parser"]["helps"]["version"])
+                                     help="Display the version of MCSH.")
         self.operations.add_argument("--help", action="help",
-                                     help=self.locale_dict["parser"]["helps"]["help"])
+                                     help="Show this help message.")
         self.operations.add_argument("--list", action="store_true",
-                                     help=self.locale_dict["parser"]["helps"]["list"])
+                                     help="List all installed server(s).")
         self.operations.add_argument("--install", action="store_true", default=False,
-                                     help=self.locale_dict["parser"]["helps"]["install"])
+                                     help="Install a server.")
         self.operations.add_argument("--remove", nargs="+", metavar="ServerName",
-                                     help=self.locale_dict["parser"]["helps"]["remove"])
+                                     help="Remove server(s).")
         self.operations.add_argument("--reinstall", nargs=1, metavar="ServerName",
-                                     help=self.locale_dict["parser"]["helps"]["reinstall"])
+                                     help="Reinstall a server.")
         self.operations.add_argument("--autoupdate", action="store_true",
-                                     help=self.locale_dict["parser"]["helps"]["autoupdate"])
+                                     help="Update all server(s) in the list.")
         self.operations.add_argument("--upgrade", action="store_true",
-                                     help=self.locale_dict["parser"]["helps"]["upgrade"])
+                                     help="Upgrade all server(s) to current version, including MCSH.\n"
+                                          "WARNING: Under very early development, strongly unrecommended.")
         self.operations.add_argument("--download", action="store_true",
-                                     help=self.locale_dict["parser"]["helps"]["download"])
+                                     help="Download a specified server program.")
         self.operations.add_argument("--repolist", action="store_true",
-                                     help=self.locale_dict["parser"]["helps"]["repolist"])
+                                     help="List all server(s) in the repository.")
         self.operations.add_argument("--reposearch", nargs=1, metavar="ServerName",
-                                     help=self.locale_dict["parser"]["helps"]["reposearch"])
+                                     help="Search for server(s) in the repository.")
         self.operations.add_argument("--reposhow", nargs=1, metavar="ServerName",
-                                     help=self.locale_dict["parser"]["helps"]["reposhow"])
+                                     help="Show the specific server detail in the repository.")
         # Commands used JUST FOR DEBUGGING
-        self.operations.add_argument("--debugging-crash", action="store_true",
-                                     help=argparse.SUPPRESS)
-
+        self.debug_operations.add_argument("--debugging-crash",
+                                           action="store_true",
+                                           help=("Crash the program."
+                                                 if self.debug
+                                                 else argparse.SUPPRESS))
+        self.debug_operations.add_argument("--debugging-enable",
+                                           action="store_true",
+                                           help=("Enable debugging features."
+                                                 if self.debug
+                                                 else argparse.SUPPRESS))
+        self.debug_operations.add_argument("--debugging-disable",
+                                           action="store_true",
+                                           help=("Disable debugging features."
+                                                 if self.debug
+                                                 else argparse.SUPPRESS))
     def parser_parse(self):
         """
         Parse the args the user had entered.
         """
-        debug_args_selected = False
         log(MODULE_NAME, "DEBUG", "Parsing arguments...")
         self.parser_args = self.parser.parse_args()
         # DEBUGGING ARGUMENTS
-        if self.parser_args.debugging_crash:
-            debug_args_selected = True
-            # TODO: Move to another debugging place
-            crash({
-                "description": "Manually triggered crash",
-                "exception": "UNKNOWN (Manually triggered crash)",
-                "computer_info": self.crash_info
-            })
+        debug_args_selected = debugging_parse(self.parser_args)
         # Normal Parsing
         for i in self.parse_sequence:
             if eval("self.parser_args." + i) is True:
@@ -220,9 +223,8 @@ class Config:
                 break
         if self.execute_command is None and debug_args_selected is False:
             log(MODULE_NAME, "ERROR", "No command specified.")
-            self.parser.print_help()
+            self.parser.print_usage()
         log(MODULE_NAME, "DEBUG", "-- Parser Summary --\n"
                                   "parser_args: {}\n"
                                   "execute_command: {}\n"
                                   "parse_sequence: {}".format(self.parser_args, self.execute_command, self.parse_sequence))
-        print(self.execute_command)

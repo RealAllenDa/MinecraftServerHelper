@@ -9,7 +9,6 @@
  Module Description:
     A module that stores all globally used variables.
 """
-DEBUG = True
 MCSH_version = "MCSH v0.0.1-InEDev"
 CRASH_REPORT_FORMAT = '''---- MCSH Crash Report ----
 Time: {time}
@@ -32,10 +31,13 @@ LOGGING_COLORS = {
     "INFO": "",
     "DEBUG": "\033[32m"
 }
-LOCALES_AVAIL = [
-    "中文（zh-cn）",
-    "English (en-us)"
-]
+TUI_COLORS = {
+    "success": "\033[1;32m",
+    "failed": "\033[1;31m",
+    "important": "\033[1;33m",
+    "info": "\033[1;34m"
+}
+TUI_CLEAR_SCREEN = "\033[2J"
 config_instance = None
 
 
